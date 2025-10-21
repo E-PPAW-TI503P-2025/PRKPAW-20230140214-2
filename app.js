@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // =========================
 // app.js - Server utama
 // =========================
@@ -93,3 +94,22 @@ app.listen(PORT, () => {
 // Port 3000 biasanya sudah digunakan server Express lain (misalnya proyek sebelumnya).
 // Dengan PORT = 3001, kamu bisa menjalankan dua server sekaligus — 
 // satu untuk percobaan Express dasar, dan satu untuk versi dengan middleware.
+=======
+const express = require('express');
+const app = express();
+const port = 3001;
+
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+  res.render('index');
+});
+
+app.get('/contact', (req, res) => {
+  res.render('contact');
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
+});
+>>>>>>> cc7c739 (Add Tugas3.md dan update dokumentasi)
