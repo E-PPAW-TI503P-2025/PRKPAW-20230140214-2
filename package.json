@@ -1,36 +1,26 @@
 {
-<<<<<<< HEAD
   "name": "express-demo",
-=======
-  "name": "y",
->>>>>>> cc7c739 (Add Tugas3.md dan update dokumentasi)
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-=======
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
->>>>>>> cc7c739 (Add Tugas3.md dan update dokumentasi)
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-<<<<<<< HEAD
-    "express": "^5.1.0"
-=======
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
-    "morgan": "^1.10.1"
->>>>>>> cc7c739 (Add Tugas3.md dan update dokumentasi)
+    "morgan": "^1.10.1",
+    "mysql2": "^3.15.3",
+    "sequelize": "^6.37.7",
+    "sequelize-cli": "^6.6.3"
   }
 }
