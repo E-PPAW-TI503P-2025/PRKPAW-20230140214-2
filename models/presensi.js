@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Presensi.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });// define association here
     }
   }
   Presensi.init({
@@ -18,10 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    nama: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    
     checkIn: {
       type: DataTypes.DATE,
       allowNull: false,

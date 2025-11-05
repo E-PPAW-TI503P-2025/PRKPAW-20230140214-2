@@ -3,57 +3,59 @@ const { format } = require("date-fns-tz");
 const timeZone = "Asia/Jakarta";
 
 // ✅ CHECK-IN
-exports.CheckIn = async (req, res) => {
+exports.CheckIn = async (req, res) => { 
   try {
-    const userId = req.body.userId || req.user.id;
-    const userName = req.body.nama || req.user.nama;
+    const userId = req.user.id;
+    const userName = req.user.nama; // dari payload JWT
     const waktuSekarang = new Date();
 
-    // Cek apakah sudah check-in hari ini
+    // ✅ Cek apakah user sudah check-in hari ini (belum check-out)
     const existingRecord = await Presensi.findOne({
-      where: { userId: userId, checkOut: null },
+      where: { userId, checkOut: null },
     });
 
     if (existingRecord) {
       return res.status(400).json({ message: "Anda sudah melakukan check-in hari ini." });
     }
 
-    // Buat data baru
+    // ✅ Buat record baru
     const newRecord = await Presensi.create({
-      userId: userId,
-      nama: userName,
+      userId,
       checkIn: waktuSekarang,
     });
 
+    // ✅ Format data sebelum dikirim ke client
     const formattedData = {
-      userId: newRecord.userId,
-      nama: newRecord.nama,
+      userId,
       checkIn: format(newRecord.checkIn, "yyyy-MM-dd HH:mm:ssXXX", { timeZone }),
       checkOut: null,
     };
 
+    // ✅ Kirim response
     res.status(201).json({
-      message: `Halo ${userName}, check-in Anda berhasil pada pukul ${format(
-        waktuSekarang,
-        "HH:mm:ss",
-        { timeZone }
-      )} WIB`,
+      message: `Halo ${userName}, check-in Anda berhasil pada pukul ${format(waktuSekarang, "HH:mm:ss", { timeZone })} WIB`,
       data: formattedData,
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+      error: error.message
+    });
   }
 };
 
 // ✅ CHECK-OUT
+// ✅ CHECK-OUT
 exports.CheckOut = async (req, res) => {
   try {
-    const userId = req.body.userId || req.user.id;
-    const userName = req.body.nama || req.user.nama;
+    const userId = req.user.id; // ambil dari payload JWT
+    const userName = req.user.nama; // ambil dari JWT
     const waktuSekarang = new Date();
 
+    // ✅ Cari record check-in yang belum di-check-out
     const recordToUpdate = await Presensi.findOne({
-      where: { userId: userId, checkOut: null },
+      where: { userId, checkOut: null },
     });
 
     if (!recordToUpdate) {
@@ -62,17 +64,19 @@ exports.CheckOut = async (req, res) => {
       });
     }
 
+    // ✅ Update waktu check-out
     recordToUpdate.checkOut = waktuSekarang;
     await recordToUpdate.save();
 
+    // ✅ Format data untuk respon
     const formattedData = {
-      userId: recordToUpdate.userId,
-      nama: recordToUpdate.nama,
+      userId,
       checkIn: format(recordToUpdate.checkIn, "yyyy-MM-dd HH:mm:ssXXX", { timeZone }),
       checkOut: format(recordToUpdate.checkOut, "yyyy-MM-dd HH:mm:ssXXX", { timeZone }),
     };
 
-    res.json({
+    // ✅ Kirim respon sukses
+    res.status(200).json({
       message: `Selamat jalan ${userName}, check-out Anda berhasil pada pukul ${format(
         waktuSekarang,
         "HH:mm:ss",
@@ -80,10 +84,15 @@ exports.CheckOut = async (req, res) => {
       )} WIB`,
       data: formattedData,
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Terjadi kesalahan pada server", error: error.message });
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+      error: error.message,
+    });
   }
 };
+
 exports.deletePresensi = async (req, res) => {
   try {
     const { id: userId, nama } = req.user || {}; // Tambahkan nama, handle kalau req.user kosong
