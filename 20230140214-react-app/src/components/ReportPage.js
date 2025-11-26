@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 function ReportPage() {
   const [reports, setReports] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchReports = async (query) => {
+  const fetchReports = async (query = "") => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
@@ -16,36 +16,45 @@ function ReportPage() {
     }
 
     try {
-		//definisikan disini
-      
+      const response = await axios.get(
+        `http://localhost:3001/api/reports/daily${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setReports(response.data.data);
+      setError(null);
+
     } catch (err) {
-      setReports([]); 
+      setReports([]);
       setError(
         err.response ? err.response.data.message : "Gagal mengambil data"
       );
     }
   };
-  
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
 
     let params = [];
 
     if (searchTerm) params.push(`nama=${searchTerm}`);
-    if (startDate) params.push(`startDate=${startDate}`);
-    if (endDate) params.push(`endDate=${endDate}`);
 
-    const queryString = params.length > 0 ? "?" + params.join("&") : "";
-
+    const queryString = params.length > 0 ? `?${params.join("&")}` : "";
     fetchReports(queryString);
-};
+  };
 
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto p-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
         Laporan Presensi Harian
       </h1>
+
       <form onSubmit={handleSearchSubmit} className="mb-6 flex space-x-2">
         <input
           type="text"
@@ -65,14 +74,17 @@ function ReportPage() {
       {error && (
         <p className="text-red-600 bg-red-100 p-4 rounded-md mb-4">{error}</p>
       )}
+
       {!error && (
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
- 
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nama
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Check-In
@@ -82,31 +94,29 @@ function ReportPage() {
                 </th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {reports.length > 0 ? (
-                reports.map((presensi) => (
-                  <tr key={presensi.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {presensi.user ? presensi.user.nama : "N/A"}
+                reports.map((item, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {item.nama}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(presensi.checkIn).toLocaleString("id-ID", {
-                        timeZone: "Asia/Jakarta",
-                      })}
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {item.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {presensi.checkOut
-                        ? new Date(presensi.checkOut).toLocaleString("id-ID", {
-                            timeZone: "Asia/Jakarta",
-                          })
-                        : "Belum Check-Out"}
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {item.checkIn}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {item.checkOut || "Belum Check-Out"}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan="3"
+                    colSpan="4"
                     className="px-6 py-4 text-center text-gray-500"
                   >
                     Tidak ada data yang ditemukan.
@@ -118,6 +128,7 @@ function ReportPage() {
         </div>
       )}
     </div>
-  )};
+  );
+}
 
 export default ReportPage;
