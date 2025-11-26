@@ -20,6 +20,7 @@ exports.CheckIn = async (req, res) => {
 
     // ✅ Buat record baru
     const newRecord = await Presensi.create({
+      nama: userName,
       userId,
       checkIn: waktuSekarang,
     });

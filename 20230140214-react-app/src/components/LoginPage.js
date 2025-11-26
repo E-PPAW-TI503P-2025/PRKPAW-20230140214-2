@@ -21,7 +21,12 @@ function LoginPage() {
       const token = response.data.token;
       localStorage.setItem('token', token);
 
+      // Decode role dari JWT
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      localStorage.setItem('role', payload.role);
+
       navigate('/dashboard');
+
     } catch (err) {
       setError(err.response ? err.response.data.message : 'Login gagal');
     }
@@ -29,15 +34,12 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black px-4">
-      
-      {/* Glow effect background */}
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-  <div className="w-[600px] h-[600px] bg-blue-500/20 blur-3xl rounded-full absolute -top-20 -left-20"></div>
-  <div className="w-[500px] h-[500px] bg-purple-500/20 blur-3xl rounded-full absolute bottom-0 right-0"></div>
-</div>
+        <div className="w-[600px] h-[600px] bg-blue-500/20 blur-3xl rounded-full absolute -top-20 -left-20"></div>
+        <div className="w-[500px] h-[500px] bg-purple-500/20 blur-3xl rounded-full absolute bottom-0 right-0"></div>
+      </div>
 
-
-      {/* Card */}
       <div className="relative bg-white/10 backdrop-blur-xl p-10 rounded-2xl shadow-xl w-full max-w-md border border-white/20">
         <h2 className="text-4xl font-extrabold text-center text-white mb-8">
           Welcome Back
@@ -52,8 +54,7 @@ function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white
-                         focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+              className="mt-1 w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
             />
           </div>
 
@@ -64,8 +65,7 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white
-                         focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+              className="mt-1 w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
             />
           </div>
 

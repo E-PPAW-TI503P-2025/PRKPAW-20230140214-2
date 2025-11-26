@@ -1,8 +1,6 @@
-const { Presensi } = require("../models");
+const { Presensi, User } = require("../models");
 const { Op } = require("sequelize");
 const { format } = require("date-fns-tz");
-
-
 
 const timeZone = "Asia/Jakarta";
 
@@ -10,14 +8,12 @@ exports.getDailyReport = async (req, res) => {
   try {
     console.log("Controller: Mengambil data laporan harian dari database...");
 
-    const { nama } = req.query; 
+    const { nama } = req.query;
     const today = new Date();
     const formattedDate = format(today, "dd/MM/yyyy", { timeZone });
 
-
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
 
     const whereCondition = {
       checkIn: {
@@ -25,22 +21,27 @@ exports.getDailyReport = async (req, res) => {
       },
     };
 
-
+    // Jika admin ingin search nama mahasiswa
     if (nama) {
-      whereCondition.nama = {
-        [Op.like]: `%${nama}%`,
-      };
+      whereCondition["$user.nama$"] = { [Op.like]: `%${nama}%` };
     }
-
 
     const dataPresensi = await Presensi.findAll({
       where: whereCondition,
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["nama", "email"],
+        },
+      ],
       order: [["checkIn", "ASC"]],
     });
 
     const result = dataPresensi.map((item) => ({
       userId: item.userId,
-      nama: item.nama,
+      nama: item.user?.nama || "Tidak ada",
+      email: item.user?.email || "Tidak ada",
       checkIn: format(item.checkIn, "yyyy-MM-dd HH:mm:ssXXX", { timeZone }),
       checkOut: item.checkOut
         ? format(item.checkOut, "yyyy-MM-dd HH:mm:ssXXX", { timeZone })

@@ -1,13 +1,3 @@
- 	exports.addUserData = (req, res, next) => {
- 	  console.log('Middleware: Menambahkan data user dummy...');
- 	  req.user = {
- 	    id: 1,
- 	    nama: `Admin User`,
- 	    role: 'admin'
- 	  };
- 	  next(); 
- 	};
- 	
  	exports.isAdmin = (req, res, next) => {
  	  if (req.user && req.user.role === 'admin') {
  	    console.log('Middleware: Izin admin diberikan.');

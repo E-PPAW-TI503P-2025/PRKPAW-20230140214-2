@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const presensiController = require('../../controllers/presensiController');
-const { addUserData } = require('../../middleware/permissionMiddleware');
-const { authenticateToken } = require('../../middleware/authenticateToken');
-router.use(addUserData);
-router.post('/checkin', authenticateToken, presensiController.CheckIn);
-router.post('/checkout', authenticateToken, presensiController.CheckOut);
-router.put('/:id', authenticateToken, presensiController.updatePresensi);
-router.delete('/:id', authenticateToken, presensiController.deletePresensi);
+const authenticateToken = require('../../middleware/authenticateToken');
+router.post('/check-in', authenticateToken.authenticateToken, presensiController.CheckIn);
+router.post('/check-out', authenticateToken.authenticateToken, presensiController.CheckOut);
+router.put('/:id', authenticateToken.authenticateToken, presensiController.updatePresensi);
+router.delete('/:id', authenticateToken.authenticateToken, presensiController.deletePresensi);
 module.exports = router;

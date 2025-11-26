@@ -1,28 +1,41 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import DashboardPage from './components/DashboardPage';
+import PresensiPage from './components/PresensiPage';
+import ReportPage from './components/ReportPage';
+import Navbar from './components/Navbar';
+import AdminDashboard from "./components/AdminDashboard";
+import StudentDashboard from "./components/StudentDashboard";
 
 function App() {
   return (
-    <BrowserRouter>
-      <div>
-        {/* Navigasi opsional */}
-        <nav className="p-4 bg-gray-100">
-          <Link to="/login" className="mr-4">Login</Link>
-          <Link to="/register">Register</Link>
-        </nav>
+    <Router>
 
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/" element={<LoginPage />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+      {/* NAVBAR GLOBAL */}
+      <Navbar />
+
+      {/* SEMUA ROUTE */}
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        <Route path="/dashboard" element={<DashboardPage />} />
+
+        {/* Presensi untuk semua user (mahasiswa/admin) */}
+        <Route path="/presensi" element={<PresensiPage />} />
+
+        {/* Reports hanya muncul di navbar jika role admin */}
+        <Route path="/reports" element={<ReportPage />} />
+
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/student" element={<StudentDashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
