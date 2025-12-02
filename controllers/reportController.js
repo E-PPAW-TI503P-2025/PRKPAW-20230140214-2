@@ -46,6 +46,8 @@ exports.getDailyReport = async (req, res) => {
       checkOut: item.checkOut
         ? format(item.checkOut, "yyyy-MM-dd HH:mm:ssXXX", { timeZone })
         : null,
+        latitude: item.latitude,
+      longitude: item.longitude,
     }));
 
     res.status(200).json({

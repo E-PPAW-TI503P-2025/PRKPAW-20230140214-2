@@ -8,6 +8,7 @@ exports.CheckIn = async (req, res) => {
     const userId = req.user.id;
     const userName = req.user.nama; // dari payload JWT
     const waktuSekarang = new Date();
+    const { latitude, longitude } = req.body;
 
     // ✅ Cek apakah user sudah check-in hari ini (belum check-out)
     const existingRecord = await Presensi.findOne({
@@ -23,6 +24,8 @@ exports.CheckIn = async (req, res) => {
       nama: userName,
       userId,
       checkIn: waktuSekarang,
+       latitude,      
+      longitude
     });
 
     // ✅ Format data sebelum dikirim ke client
@@ -46,13 +49,15 @@ exports.CheckIn = async (req, res) => {
   }
 };
 
-// ✅ CHECK-OUT
+
 // ✅ CHECK-OUT
 exports.CheckOut = async (req, res) => {
   try {
     const userId = req.user.id; // ambil dari payload JWT
     const userName = req.user.nama; // ambil dari JWT
     const waktuSekarang = new Date();
+    const { latitude, longitude } = req.body;
+
 
     // ✅ Cari record check-in yang belum di-check-out
     const recordToUpdate = await Presensi.findOne({
@@ -67,6 +72,8 @@ exports.CheckOut = async (req, res) => {
 
     // ✅ Update waktu check-out
     recordToUpdate.checkOut = waktuSekarang;
+    recordToUpdate.latitude = latitude;       
+    recordToUpdate.longitude = longitude;
     await recordToUpdate.save();
 
     // ✅ Format data untuk respon

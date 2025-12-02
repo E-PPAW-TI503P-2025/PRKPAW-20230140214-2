@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
 function ReportPage() {
   const [reports, setReports] = useState([]);
@@ -38,7 +39,6 @@ function ReportPage() {
     e.preventDefault();
 
     let params = [];
-
     if (searchTerm) params.push(`nama=${searchTerm}`);
 
     const queryString = params.length > 0 ? `?${params.join("&")}` : "";
@@ -61,11 +61,11 @@ function ReportPage() {
           placeholder="Cari berdasarkan nama..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm"
         />
         <button
           type="submit"
-          className="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700"
+          className="py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
         >
           Cari
         </button>
@@ -76,55 +76,58 @@ function ReportPage() {
       )}
 
       {!error && (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nama
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-In
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check-Out
-                </th>
-              </tr>
-            </thead>
+        <div className="space-y-6">
+          {reports.length > 0 ? (
+            reports.map((item, index) => (
+              <div key={index} className="bg-white shadow-md p-6 rounded-lg">
+                
+                {/* TABEL INFORMASI */}
+                <table className="min-w-full mb-4">
+                  <thead>
+                    <tr>
+                      <th className="text-left font-semibold">Nama</th>
+                      <th className="text-left font-semibold">Email</th>
+                      <th className="text-left font-semibold">Check-In</th>
+                      <th className="text-left font-semibold">Check-Out</th>
+                      <th className="text-left font-semibold">Latitude</th>
+                      <th className="text-left font-semibold">Longitude</th>
+                    </tr>
+                  </thead>
 
-            <tbody className="bg-white divide-y divide-gray-200">
-              {reports.length > 0 ? (
-                reports.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {item.nama}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {item.email}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {item.checkIn}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {item.checkOut || "Belum Check-Out"}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="px-6 py-4 text-center text-gray-500"
+                  <tbody>
+                    <tr>
+                      <td className="py-2">{item.nama}</td>
+                      <td className="py-2">{item.email}</td>
+                      <td className="py-2">{item.checkIn}</td>
+                      <td className="py-2">{item.checkOut || "Belum Check-Out"}</td>
+                      <td className="py-2">{item.latitude}</td>
+                      <td className="py-2">{item.longitude}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* MAP */}
+                {item.latitude && item.longitude && (
+                  <MapContainer
+                    center={[item.latitude, item.longitude]}
+                    zoom={16}
+                    style={{ height: "250px", width: "100%" }}
+                    className="rounded-md overflow-hidden"
                   >
-                    Tidak ada data yang ditemukan.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    <Marker position={[item.latitude, item.longitude]}>
+                      <Popup>
+                        Lokasi presensi {item.nama}
+                      </Popup>
+                    </Marker>
+                  </MapContainer>
+                )}
+
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">Tidak ada data presensi.</p>
+          )}
         </div>
       )}
     </div>
