@@ -29,8 +29,12 @@ module.exports = (sequelize, DataTypes) => {
   },
   longitude: {
   type: DataTypes.DECIMAL(11, 8),
-  allowNull: true,
-}
+  allowNull: true, },
+  buktiFoto: {
+      type: DataTypes.STRING,
+      allowNull: true, // Boleh null jika tidak ada foto
+},
+    
 
   }, {
     sequelize,

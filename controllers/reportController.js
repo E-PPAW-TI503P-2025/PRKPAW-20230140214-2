@@ -48,6 +48,7 @@ exports.getDailyReport = async (req, res) => {
         : null,
         latitude: item.latitude,
       longitude: item.longitude,
+      buktiFoto: item.buktiFoto ? item.buktiFoto.replace("\\", "/") : null,
     }));
 
     res.status(200).json({

@@ -1,6 +1,24 @@
 const { Presensi } = require("../models");
 const { format } = require("date-fns-tz");
 const timeZone = "Asia/Jakarta";
+const multer = require('multer');
+const path = require('path');
+const fs = require("fs");
+
+// === KONFIGURASI MULTER ===
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "uploads";
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${req.user.id}-${Date.now()}.jpg`);
+  },
+});
+
+exports.upload = multer({ storage });
+
 
 // ✅ CHECK-IN
 exports.CheckIn = async (req, res) => { 
@@ -9,6 +27,7 @@ exports.CheckIn = async (req, res) => {
     const userName = req.user.nama; // dari payload JWT
     const waktuSekarang = new Date();
     const { latitude, longitude } = req.body;
+    const buktiFoto = req.file ? req.file.path : null; 
 
     // ✅ Cek apakah user sudah check-in hari ini (belum check-out)
     const existingRecord = await Presensi.findOne({
@@ -25,7 +44,8 @@ exports.CheckIn = async (req, res) => {
       userId,
       checkIn: waktuSekarang,
        latitude,      
-      longitude
+      longitude,
+      buktiFoto, // Simpan path foto jika ada
     });
 
     // ✅ Format data sebelum dikirim ke client

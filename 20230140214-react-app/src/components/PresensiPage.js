@@ -1,82 +1,76 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { Camera } from "react-camera-pro";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+const markerIcon = new L.Icon({
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
 function AttendancePage() {
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [coords, setCoords] = useState(null);
-  const [loadingLocation, setLoadingLocation] = useState(true);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [image, setImage] = useState(null);
 
+  const cameraRef = useRef(null);
   const token = localStorage.getItem("token");
 
-  // ======================
-  // GET USER LOCATION
-  // ======================
+  // GET LOCATION
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("Browser tidak mendukung geolocation.");
-      setLoadingLocation(false);
-      return;
-    }
-
+    console.log("MINTA GEOLOCATION...");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setCoords({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
         });
-        setLoadingLocation(false);
       },
-      (err) => {
-        setError("Harap aktifkan GPS Anda: " + err.message);
-        setLoadingLocation(false);
-      }
+      (err) => setError("Gagal mendapatkan lokasi: " + err.message)
     );
   }, []);
 
-  // ======================
-  // HANDLE CHECK-IN
-  // ======================
+  // HANDLE CHECK-IN WITH PHOTO
   const handleCheckIn = async () => {
-    setMessage("");
-    setError("");
-
-    if (!coords) {
-      setError("Lokasi belum ditemukan. Nyalakan GPS.");
+    if (!coords || !image) {
+      setError("Lokasi + Foto wajib ada!");
       return;
     }
 
     try {
+      const blob = await (await fetch(image)).blob();
+      const formData = new FormData();
+
+      formData.append("latitude", coords.lat);
+      formData.append("longitude", coords.lng);
+      formData.append("image", blob, "selfie.jpg");
+
       const res = await axios.post(
         "http://localhost:3001/api/presensi/check-in",
+        formData,
         {
-          latitude: coords.lat,
-          longitude: coords.lng,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
-      setMessage(res.data.message || "Check-in berhasil!");
+      setMessage(res.data.message);
     } catch (err) {
-      setError(err.response?.data?.message || "Check-in gagal!");
+      setError("Check-in gagal!");
     }
   };
 
-  // ======================
   // HANDLE CHECK-OUT
-  // ======================
   const handleCheckOut = async () => {
-    setMessage("");
-    setError("");
-
-    if (!coords) {
-      setError("Lokasi belum ditemukan. Nyalakan GPS.");
-      return;
-    }
-
     try {
       const res = await axios.post(
         "http://localhost:3001/api/presensi/check-out",
@@ -89,23 +83,20 @@ function AttendancePage() {
         }
       );
 
-      setMessage(res.data.message || "Check-out berhasil!");
+      setMessage(res.data.message);
     } catch (err) {
-      setError(err.response?.data?.message || "Check-out gagal!");
+      setError("Check-out gagal!");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
+    <div className="min-h-screen bg-gray-100 flex justify-center p-4">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
 
-        <h2 className="text-3xl font-bold mb-6 text-gray-800">
-          Lakukan Presensi
-        </h2>
+        <h1 className="text-2xl font-bold mb-4">Presensi Lokasi</h1>
 
-        {loadingLocation && <p className="text-gray-700 mb-4">Mengambil lokasi…</p>}
-        {error && <p className="text-red-600 mb-4">{error}</p>}
-        {message && <p className="text-green-600 mb-4">{message}</p>}
+        {message && <p className="text-green-600">{message}</p>}
+        {error && <p className="text-red-600">{error}</p>}
 
         {/* MAP */}
         {coords && (
@@ -116,24 +107,52 @@ function AttendancePage() {
               style={{ height: "250px", width: "100%" }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[coords.lat, coords.lng]}>
+              <Marker icon={markerIcon} position={[coords.lat, coords.lng]}>
                 <Popup>Lokasi Anda</Popup>
               </Marker>
             </MapContainer>
           </div>
         )}
 
-        <div className="flex space-x-4">
+        {/* CAMERA */}
+        <div className="border rounded-lg overflow-hidden bg-black mb-4">
+          {!image ? (
+            <Camera ref={cameraRef} facingMode="user" aspectRatio={16 / 9} />
+          ) : (
+            <img src={image} alt="Selfie" className="w-full" />
+          )}
+        </div>
+
+        <div className="mb-4">
+          {!image ? (
+            <button
+              className="w-full bg-blue-600 text-white py-2 rounded"
+              onClick={() => setImage(cameraRef.current.takePhoto())}
+            >
+              Ambil Foto 📸
+            </button>
+          ) : (
+            <button
+              className="w-full bg-gray-600 text-white py-2 rounded"
+              onClick={() => setImage(null)}
+            >
+              Foto Ulang 🔄
+            </button>
+          )}
+        </div>
+
+        {/* BUTTONS */}
+        <div className="flex gap-3">
           <button
+            className="flex-1 bg-green-600 text-white py-2 rounded"
             onClick={handleCheckIn}
-            className="w-full py-3 px-4 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700"
           >
             Check-In
           </button>
 
           <button
+            className="flex-1 bg-red-600 text-white py-2 rounded"
             onClick={handleCheckOut}
-            className="w-full py-3 px-4 bg-red-600 text-white font-semibold rounded-md shadow-sm hover:bg-red-700"
           >
             Check-Out
           </button>
