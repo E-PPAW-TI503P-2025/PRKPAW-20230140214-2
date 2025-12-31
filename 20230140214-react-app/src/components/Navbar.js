@@ -41,6 +41,8 @@ function Navbar() {
             {/* Semua user bisa presensi */}
             <Link to="/presensi" className="hover:text-green-400">Presensi</Link>
 
+            <Link to="/monitoring" className="...">Monitoring Suhu</Link>
+
             {/* Khusus admin */}
             {role === "admin" && (
               <Link to="/reports" className="hover:text-green-400">Laporan</Link>

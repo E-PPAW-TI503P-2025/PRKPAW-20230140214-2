@@ -28,11 +28,13 @@ const presensiRoutes = require("./express-demo/routes/presensi");
 const reportRoutes = require("./express-demo/routes/reports");
 const authRoutes = require("./express-demo/routes/auth");
 const bookRoutes = require("./express-demo/routes/books");
+const iotRoutes = require("./express-demo/routes/iot");
 
 app.use("/api/books", bookRoutes);
 app.use("/api/presensi", presensiRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/iot", iotRoutes);
 
 // ==== LISTEN PALING TERAKHIR ====
 app.listen(PORT, () => {

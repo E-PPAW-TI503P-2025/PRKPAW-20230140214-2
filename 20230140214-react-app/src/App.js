@@ -9,6 +9,8 @@ import ReportPage from './components/ReportPage';
 import Navbar from './components/Navbar';
 import AdminDashboard from "./components/AdminDashboard";
 import StudentDashboard from "./components/StudentDashboard";
+import SensorPage from './components/SensorPage';
+import DashboardIoT from './components/DashboardIoT';
 
 function App() {
   return (
@@ -34,6 +36,9 @@ function App() {
 
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/monitoring" element={<SensorPage />} />
+        <Route path="/iot-dashboard" element={<DashboardIoT />} />
+        
       </Routes>
     </Router>
   );
